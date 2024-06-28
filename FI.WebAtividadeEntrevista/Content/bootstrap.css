@@ -3381,6 +3381,12 @@ input[type="button"].btn-block {
   border-bottom-color: #fff;
 }
 
+.btn-beneficiaries {
+    color: #ffffff !important;
+    background-color: #428bca !important;
+    border-color: #357ebd !important;
+}
+
 .btn-group,
 .btn-group-vertical {
   position: relative;
@@ -6814,11 +6820,7 @@ td.visible-print {
     display: none !important;
   }
 
-    .btn-beneficiaries {
-        color: #ffffff;
-        background-color: #5cb85c;
-        border-color: #4cae4c;
-    }
+
 
     .btn-beneficiaries:hover,
     .btn-beneficiaries:focus,

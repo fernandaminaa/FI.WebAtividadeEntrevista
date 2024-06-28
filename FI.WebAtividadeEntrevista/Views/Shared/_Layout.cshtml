@@ -7,6 +7,14 @@
     @Styles.Render("~/Content/css")
     @Styles.Render("~/Content/jtable")
     @Scripts.Render("~/bundles/modernizr")
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/jqueryui")
+    @Scripts.Render("~/bundles/jtable")
+    @Scripts.Render("~/bundles/bootstrap")
+    @RenderSection("scripts", required: false)
 </head>
 <body>
     <div class="navbar navbar-inverse navbar-fixed-top">
@@ -34,13 +42,26 @@
             <p>&copy; @DateTime.Now.Year - My ASP.NET Application</p>
         </footer>
     </div>
+    <script>
+        function formatarCPF(cpf) {
+            cpf = cpf.replace(/\D/g, '');
+            cpf = cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+            return cpf;
+        }
 
-    @Scripts.Render("~/bundles/jquery")
-    @Scripts.Render("~/bundles/jqueryui")
-    @Scripts.Render("~/bundles/jtable")
-    @Scripts.Render("~/bundles/bootstrap")
-    <!-- Adicione a referência ao jQuery Mask -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
-    @RenderSection("scripts", required: false)
+        $(document).ready(function () {
+            $('#CPF').on('input', function () {
+                var cpfDigitado = $(this).val();
+                var cpfFormatado = formatarCPF(cpfDigitado);
+                $(this).val(cpfFormatado);
+            });
+
+            $('#CPFBeneficiario').on('input', function () {
+                var cpfDigitado = $(this).val();
+                var cpfFormatado = formatarCPF(cpfDigitado);
+                $(this).val(cpfFormatado);
+            });
+        });
+    </script>
 </body>
 </html>

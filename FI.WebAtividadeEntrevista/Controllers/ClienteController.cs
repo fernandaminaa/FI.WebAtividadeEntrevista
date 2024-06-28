@@ -16,7 +16,6 @@ namespace WebAtividadeEntrevista.Controllers
             return View();
         }
 
-
         public ActionResult Incluir()
         {
             return View();
@@ -26,7 +25,8 @@ namespace WebAtividadeEntrevista.Controllers
         public JsonResult Incluir(ClienteModel model)
         {
             BoCliente bo = new BoCliente();
-            
+            BoBeneficiario boBeneficiario = new BoBeneficiario();
+
             if (!this.ModelState.IsValid)
             {
                 List<string> erros = (from item in ModelState.Values
@@ -38,9 +38,8 @@ namespace WebAtividadeEntrevista.Controllers
             }
             else
             {
-                
                 model.Id = bo.Incluir(new Cliente()
-                {                    
+                {
                     CEP = model.CEP,
                     Cidade = model.Cidade,
                     Email = model.Email,
@@ -53,16 +52,26 @@ namespace WebAtividadeEntrevista.Controllers
                     CPF = model.CPF
                 });
 
-           
+                if (!string.IsNullOrEmpty(model.CPFBeneficiario) && !string.IsNullOrEmpty(model.NomeBeneficiario))
+                {
+                    boBeneficiario.Incluir(new Beneficiario()
+                    {
+                        CPF = model.CPFBeneficiario,
+                        Nome = model.NomeBeneficiario,
+                        IDCliente = model.Id
+                    });
+                }
+
                 return Json("Cadastro efetuado com sucesso");
             }
         }
+
 
         [HttpPost]
         public JsonResult Alterar(ClienteModel model)
         {
             BoCliente bo = new BoCliente();
-       
+
             if (!this.ModelState.IsValid)
             {
                 List<string> erros = (from item in ModelState.Values
@@ -88,7 +97,7 @@ namespace WebAtividadeEntrevista.Controllers
                     Telefone = model.Telefone,
                     CPF = model.CPF
                 });
-                               
+
                 return Json("Cadastro alterado com sucesso");
             }
         }
@@ -116,8 +125,6 @@ namespace WebAtividadeEntrevista.Controllers
                     Telefone = cliente.Telefone,
                     CPF = cliente.CPF
                 };
-
-            
             }
 
             return View(model);
@@ -141,7 +148,6 @@ namespace WebAtividadeEntrevista.Controllers
 
                 List<Cliente> clientes = new BoCliente().Pesquisa(jtStartIndex, jtPageSize, campo, crescente.Equals("ASC", StringComparison.InvariantCultureIgnoreCase), out qtd);
 
-                //Return result to jTable
                 return Json(new { Result = "OK", Records = clientes, TotalRecordCount = qtd });
             }
             catch (Exception ex)

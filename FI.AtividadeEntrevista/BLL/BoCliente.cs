@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FI.AtividadeEntrevista.DAL;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,12 +9,20 @@ namespace FI.AtividadeEntrevista.BLL
 {
     public class BoCliente
     {
+        private DaoCliente daoCliente = new DaoCliente();
+        
         /// <summary>
         /// Inclui um novo cliente
         /// </summary>
         /// <param name="cliente">Objeto de cliente</param>
         public long Incluir(DML.Cliente cliente)
         {
+            if (VerificarExistencia(cliente.CPF))
+                throw new ArgumentException("CPF já existe!");
+
+            if (!IsValidCpf(cliente.CPF))
+                throw new ArgumentException("CPF inválido!");
+
             DAL.DaoCliente cli = new DAL.DaoCliente();
             return cli.Incluir(cliente);
         }
@@ -77,6 +86,12 @@ namespace FI.AtividadeEntrevista.BLL
         {
             DAL.DaoCliente cli = new DAL.DaoCliente();
             return cli.VerificarExistencia(CPF);
+        }
+
+        public bool IsValidCpf(string CPF)
+        {
+            DAL.DaoCliente cli = new DAL.DaoCliente();
+            return cli.IsValidCpf(CPF);
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using FI.AtividadeEntrevista.DML;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -28,6 +29,16 @@ namespace FI.AtividadeEntrevista.DAL
             parametros.Add(new System.Data.SqlClient.SqlParameter("Email", cliente.Email));
             parametros.Add(new System.Data.SqlClient.SqlParameter("Telefone", cliente.Telefone));
             parametros.Add(new System.Data.SqlClient.SqlParameter("CPF", cliente.CPF));
+
+            if (VerificarExistencia(cliente.CPF))
+            {
+                throw new ArgumentException("CPF já existe!");
+            }
+
+            if (!IsValidCpf(cliente.CPF))
+            {
+                throw new ArgumentException("CPF inválido!");
+            }
 
             DataSet ds = base.Consultar("FI_SP_IncClienteV2", parametros);
             long ret = 0;
@@ -101,7 +112,7 @@ namespace FI.AtividadeEntrevista.DAL
         }
 
         /// <summary>
-        /// Inclui um novo cliente
+        /// Altera dados do cliente
         /// </summary>
         /// <param name="cliente">Objeto de cliente</param>
         internal void Alterar(DML.Cliente cliente)
@@ -119,6 +130,11 @@ namespace FI.AtividadeEntrevista.DAL
             parametros.Add(new System.Data.SqlClient.SqlParameter("Telefone", cliente.Telefone));
             parametros.Add(new System.Data.SqlClient.SqlParameter("ID", cliente.Id));
             parametros.Add(new System.Data.SqlClient.SqlParameter("CPF", cliente.CPF));
+
+            if (!IsValidCpf(cliente.CPF))
+            {
+                throw new ArgumentException("CPF inválido.");
+            }
 
             base.Executar("FI_SP_AltCliente", parametros);
         }
@@ -163,9 +179,9 @@ namespace FI.AtividadeEntrevista.DAL
             return lista;
         }
 
-        public static bool IsValidCpf(string cpf)
+        public bool IsValidCpf(string cpf)
         {
-            if (cpf == null)
+            if (string.IsNullOrWhiteSpace(cpf))
             {
                 return false;
             }
@@ -177,66 +193,31 @@ namespace FI.AtividadeEntrevista.DAL
                 return false;
             }
 
-            bool allDigitsSame = true;
-            for (int i = 1; i < 11 && allDigitsSame; i++)
-            {
-                if (cpf[i] != cpf[0])
-                {
-                    allDigitsSame = false;
-                }
-            }
-
-            if (allDigitsSame || cpf == "12345678909")
+            if (cpf.All(c => c == cpf[0]))
             {
                 return false;
             }
 
-            int[] numbers = new int[11];
+            int[] multiplicadores1 = { 10, 9, 8, 7, 6, 5, 4, 3, 2 };
+            int[] multiplicadores2 = { 11, 10, 9, 8, 7, 6, 5, 4, 3, 2 };
 
-            for (int i = 0; i < 11; i++)
+            int CalcularDigito(string s, int[] multiplicadores)
             {
-                numbers[i] = int.Parse(cpf[i].ToString());
-            }
-
-            int sum = 0;
-            for (int i = 0; i < 9; i++)
-            {
-                sum += (10 - i) * numbers[i];
-            }
-
-            int result = sum % 11;
-            if (result == 1 || result == 0)
-            {
-                if (numbers[9] != 0)
+                int soma = 0;
+                for (int i = 0; i < multiplicadores.Length; i++)
                 {
-                    return false;
+                    soma += int.Parse(s[i].ToString()) * multiplicadores[i];
                 }
-            }
-            else if (numbers[9] != 11 - result)
-            {
-                return false;
+
+                int resto = soma % 11;
+                return resto < 2 ? 0 : 11 - resto;
             }
 
-            sum = 0;
-            for (int i = 0; i < 10; i++)
-            {
-                sum += (11 - i) * numbers[i];
-            }
+            string tempCpf = cpf.Substring(0, 9);
+            int digito1 = CalcularDigito(tempCpf, multiplicadores1);
+            int digito2 = CalcularDigito(tempCpf + digito1, multiplicadores2);
 
-            result = sum % 11;
-            if (result == 1 || result == 0)
-            {
-                if (numbers[10] != 0)
-                {
-                    return false;
-                }
-            }
-            else if (numbers[10] != 11 - result)
-            {
-                return false;
-            }
-
-            return true;
+            return cpf.EndsWith(digito1.ToString() + digito2.ToString());
         }
     }
 }
